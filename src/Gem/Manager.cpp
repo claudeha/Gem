@@ -52,7 +52,9 @@
 
 #ifndef GEM_MULTICONTEXT
 static WindowInfo gfxInfo;
+#ifndef __EMSCRIPTEN__
 static WindowInfo constInfo;
+#endif
 #endif /* GEM_MULTICONTEXT */
 
 
@@ -124,7 +126,11 @@ static int s_windowDelTime = 10;
 
 
 static int s_windowRun = 0;
+#ifdef __EMSCRIPTEN__
+static int s_singleContext = 1;
+#else
 static int s_singleContext = 0;
+#endif
 
 /////////////////////////////////////////////////////////
 // dispatchGemWindowMessages
@@ -555,6 +561,8 @@ static inline void setColorMask(color_t color)
 
 void GemMan :: render(void *)
 {
+  gemWinMakeCurrent(gfxInfo);
+
   int profiling=m_profile;
   t_symbol*chain1=gensym("__gem_render");
   t_symbol*chain2=gensym("__gem_render_osd");
@@ -589,7 +597,12 @@ void GemMan :: render(void *)
   //test to see if stereo is supported
   //XXX maybe there is a better place to do this?
   GLboolean stereoWindowTest;
+#ifdef __EMSCRIPTEN__
+  // GL_STEREO is not supported by Regal
+  stereoWindowTest = GL_FALSE;
+#else
   glGetBooleanv (GL_STEREO, &stereoWindowTest);
+#endif
   //if we're trying to do crystal glasses stereo but don't have a stereo window
   //disable stereo and post a warning
   if(m_stereo == 3 && !stereoWindowTest) {
@@ -834,6 +847,9 @@ void GemMan :: render(void *)
   }
   break;
   default: { // normal rendering
+#ifdef __EMSCRIPTEN__
+    glClear(m_clear_mask);
+#endif
     fillGemState(currentState);
     renderChain(chain1, &currentState);
 
@@ -1012,15 +1028,23 @@ int GemMan :: createWindow(const char* disp)
   myHints.secondscreen = m_secondscreen;
   myHints.x_offset = m_xoffset;
   myHints.y_offset = m_yoffset;
+#ifdef __EMSCRIPTEN__
+  myHints.shared = 0;
+#else
   myHints.shared = constInfo.context;
+#endif
   myHints.actuallyDisplay = 1;
   myHints.display = disp;
   myHints.title = const_cast<char*>(GemMan::m_title.c_str());
   myHints.fsaa = fsaa;
 
+#ifdef __EMSCRIPTEN__
+  post("GEM: creating gem-window for WebGL");
+#else
   if (disp) {
     post("GEM: creating gem-window on display %s",disp);
   }
+#endif
   if (!createGemWindow(gfxInfo, myHints) ) {
     error("GEM: Unable to create window");
     return(0);
@@ -1119,7 +1143,9 @@ void GemMan :: destroyWindow()
 
   // reestablish the const glxContext
   /* this crashes on linux with intel cards */
+#ifndef __EMSCRIPTEN__
   gemWinMakeCurrent(constInfo);
+#endif
   s_windowRun = 0;
 #endif /* GEM_MULTICONTEXT */
 }
@@ -1143,6 +1169,7 @@ int GemMan::createConstWindow(const char* disp)
     return(GemMan::createWindow(disp));
   }
 
+#ifndef __EMSCRIPTEN__
   WindowHints myHints;
   myHints.title = const_cast<char*>(GemMan::m_title.c_str());
   myHints.border = 1;
@@ -1168,6 +1195,7 @@ int GemMan::createConstWindow(const char* disp)
     constInfo.have_constContext=1;
     gfxInfo.have_constContext=1;
   }
+#endif
 #endif /* GEM_MULTICONTEXT */
   return(1);
 }
@@ -1180,7 +1208,9 @@ void destroyConstWindow()
 {
 #ifndef GEM_MULTICONTEXT
   if (!s_singleContext) {
+#ifndef __EMSCRIPTEN__
     destroyGemWindow(constInfo);
+#endif
   }
 #endif /* GEM_MULTICONTEXT */
 }
@@ -1204,7 +1234,10 @@ void GemMan :: swapBuffers()
   //  TODO:
   //  why is this called here?
   //  seems like it'd ruin single buffer rendering...
+#ifndef __EMSCRIPTEN__
+  // ruins all webgl rendering, because control yielding to browser triggers swap buffers
   glClear(m_clear_mask);
+#endif
   // why is this called here?
   // glColor3f(1.0, 1.0, 1.0);
   // why is this called here?
@@ -1553,6 +1586,10 @@ WindowInfo &GemMan :: getWindowInfo()
 /////////////////////////////////////////////////////////
 WindowInfo &GemMan :: getConstWindowInfo()
 {
+#ifdef __EMSCRIPTEN__
+  return gfxInfo;
+#else
   return(constInfo);
+#endif
 }
 #endif /* GEM_MULTICONTEXT */
