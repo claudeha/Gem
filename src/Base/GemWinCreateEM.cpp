@@ -89,6 +89,7 @@ GEM_EXTERN int createGemWindow(WindowInfo &info, WindowHints &hints)
     destroyGemWindow(info);
     return(0);
   }
+  RegalMakeCurrent((void*)1);
 
   if (fullscreen) {
     SDL_RaiseWindow(info.win);
@@ -158,6 +159,7 @@ void gemWinMakeCurrent(WindowInfo&nfo)
     return;  // do not crash ??
   }
   SDL_GL_MakeCurrent(nfo.win, nfo.context);
+  RegalMakeCurrent((void*)1);
 }
 
 bool initGemWin(void)
