@@ -1,3 +1,4 @@
+#ifndef __EMSCRIPTEN__
 /*
  *  pix_share_read.h
  *  GEM_darwin
@@ -29,3 +30,4 @@ protected:
 };
 
 #endif
+#enidf

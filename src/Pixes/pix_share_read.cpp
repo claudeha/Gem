@@ -1,3 +1,4 @@
+#ifndef __EMSCRIPTEN__
 /*
  *  pix_share_read.cpp
  *  GEM_darwin
@@ -61,3 +62,5 @@ void pix_share_read :: render(GemState *state)
 
 void pix_share_read :: obj_setupCallback(t_class *classPtr)
 {}
+
+#endif

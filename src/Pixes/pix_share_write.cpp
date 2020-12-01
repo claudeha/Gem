@@ -1,3 +1,4 @@
+#ifndef __EMSCRIPTEN__
 /*
  *  pix_share_write.cpp
  *  GEM_darwin
@@ -442,3 +443,5 @@ void pix_share_write :: setMessCallback(void *data, t_symbol *s, int argc,
     GetMyClass(data)->error("no args given!");
   }
 }
+s
+#endif
