@@ -39,12 +39,12 @@
 
 
 #ifdef __EMSCRIPTEN__
-# include <GL/glew.h>
-# include <SDL/SDL_opengl.h>
-# include <GL/gl.h>
+# include <GL/RegalGLEW.h>
+# include <GL/Regal.h>
 # ifdef GEM_HAVE_GLU
-#  include <GL/glu.h>
+#  include <GL/RegalGLU.h>
 # endif
+# include <SDL/SDL_opengl.h>
 #else
 # include "Gem/glew.h"
 #endif
