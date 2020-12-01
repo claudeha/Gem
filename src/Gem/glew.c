@@ -1,3 +1,4 @@
+#ifndef __EMSCRIPTEN__
 #include "Gem/GemGLconfig.h"
 #ifdef GEM_MULTICONTEXT
 # define GLEW_MX
@@ -18609,3 +18610,4 @@ GLboolean glxewIsSupported (const char* name)
 }
 
 #endif /* _WIN32 */
+#endif /* __EMSCRIPTEN__ */
